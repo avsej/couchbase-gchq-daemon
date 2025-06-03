@@ -14,10 +14,12 @@
 
 #pragma once
 
+#include "gchq_daemon_export.h"
+
 #include <memory>
 #include <string>
 
-class single_instance_lock
+class GCHQ_DAEMON_EXPORT single_instance_lock
 {
 public:
   single_instance_lock(const std::string& name);
