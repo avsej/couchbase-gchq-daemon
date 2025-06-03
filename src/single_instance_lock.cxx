@@ -12,7 +12,8 @@
  * the License.
  */
 
-#include <iostream>
+#include "single_instance_lock.hxx"
+
 #include <string>
 
 #if defined(_WIN32)
@@ -24,18 +25,12 @@
 #include <unistd.h>
 #endif
 
-class single_instance_lock
-{
-public:
-  single_instance_lock(const std::string& name)
-    : acquired_(false)
+struct single_instance_lock::os_resource {
+  bool acquired_{ false };
+
 #if defined(_WIN32)
-    , mutex_(nullptr)
-#else
-    , fd_(-1)
-#endif
+  os_resource(const std::string& name)
   {
-#if defined(_WIN32)
     std::string mutex_name = "Global\\" + name;
     mutex_ = CreateMutexA(nullptr, FALSE, mutex_name.c_str());
     if (mutex_ && GetLastError() != ERROR_ALREADY_EXISTS) {
@@ -44,9 +39,21 @@ public:
       CloseHandle(mutex_);
       mutex_ = nullptr;
     }
+  }
+
+  ~os_resource()
+  {
+    if (mutex_) {
+      CloseHandle(mutex_);
+    }
+  }
+
+  HANDLE mutex_{ nullptr };
 #else
-    namespace fs = std::filesystem;
-    fs::path lockfile = fs::temp_directory_path() / (name + ".lock");
+
+  os_resource(const std::string& name)
+  {
+    std::filesystem::path lockfile = std::filesystem::temp_directory_path() / (name + ".lock");
     fd_ = open(lockfile.c_str(), O_RDWR | O_CREAT, 0666);
     if (fd_ >= 0 && flock(fd_, LOCK_EX | LOCK_NB) == 0) {
       acquired_ = true;
@@ -54,47 +61,26 @@ public:
       close(fd_);
       fd_ = -1;
     }
-#endif
   }
 
-  single_instance_lock(const single_instance_lock&) = delete;
-  single_instance_lock& operator=(const single_instance_lock&) = delete;
-
-  ~single_instance_lock()
+  ~os_resource()
   {
-#if defined(_WIN32)
-    if (mutex_)
-      CloseHandle(mutex_);
-#else
-    if (fd_ >= 0)
+    if (fd_ >= 0) {
       close(fd_);
-#endif
+    }
   }
-
-  bool acquired() const
-  {
-    return acquired_;
-  }
-
-private:
-  bool acquired_;
-#if defined(_WIN32)
-  HANDLE mutex_;
-#else
-  int fd_;
+  int fd_{ -1 };
 #endif
 };
 
-int
-main()
+single_instance_lock::single_instance_lock(const std::string& name)
+  : impl_{ std::make_unique<os_resource>(name) }
 {
-  single_instance_lock lock("my_unique_daemon");
+}
+single_instance_lock::~single_instance_lock() = default;
 
-  if (lock.acquired()) {
-    std::cout << "This process is the main (daemon) process.\n";
-    getchar();
-  } else {
-    std::cout << "Another daemon process is already running. Exiting.\n";
-  }
-  return 0;
+auto
+single_instance_lock::acquired() const -> bool
+{
+  return impl_->acquired_;
 }
