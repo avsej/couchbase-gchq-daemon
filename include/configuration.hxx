@@ -12,19 +12,23 @@
  * the License.
  */
 
-#include <single_instance_lock.hxx>
+#pragma once
 
-#include <iostream>
+#include "gchq_daemon_export.h"
 
-int
-main()
+#include <cstdint>
+#include <string>
+
+class GCHQ_DAEMON_EXPORT configuration
 {
-  single_instance_lock lock("my_unique_daemon");
+public:
+  auto revision() const -> std::uint64_t;
 
-  if (lock.acquired()) {
-    std::cout << "This process is the main (daemon) process.\n";
-  } else {
-    std::cout << "Another daemon process is already running. Exiting.\n";
-  }
-  return 0;
-}
+private:
+  std::uint64_t revision_{ 0 };
+
+  friend auto to_string(const configuration& config) -> std::string;
+};
+
+GCHQ_DAEMON_EXPORT auto
+to_string(const configuration& config) -> std::string;

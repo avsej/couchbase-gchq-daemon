@@ -12,19 +12,22 @@
  * the License.
  */
 
-#include <single_instance_lock.hxx>
+#include <configuration.hxx>
 
-#include <iostream>
+#include <sstream>
 
-int
-main()
+auto
+configuration::revision() const -> std::uint64_t
 {
-  single_instance_lock lock("my_unique_daemon");
+  return revision_;
+}
 
-  if (lock.acquired()) {
-    std::cout << "This process is the main (daemon) process.\n";
-  } else {
-    std::cout << "Another daemon process is already running. Exiting.\n";
-  }
-  return 0;
+auto
+to_string(const configuration& config) -> std::string
+{
+  std::ostringstream oss;
+  oss << "#<configuration:"
+      << "0x" << std::hex << std::uppercase << reinterpret_cast<std::uintptr_t>(&config)
+      << " revision_=" << std::dec << config.revision_ << ">";
+  return oss.str();
 }
