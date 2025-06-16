@@ -16,11 +16,21 @@
 
 #include "gchq_daemon_export.h"
 
-#include <configuration.hxx>
+#include <string>
+#include <variant>
 
-class GCHQ_DAEMON_EXPORT configuration_monitor
+class configuration_monitor_factory;
+
+class GCHQ_DAEMON_EXPORT configuration_monitor_options
 {
 public:
-  virtual auto current_configuration() const -> configuration = 0;
-  virtual ~configuration_monitor() = default;
+  using option_value = std::variant<bool, std::string>;
+  configuration_monitor_options(std::initializer_list<std::pair<std::string, option_value>> params);
+
+  auto caching(bool enabled) -> configuration_monitor_options&;
+
+private:
+  friend class configuration_monitor_factory;
+
+  bool caching_{ false };
 };

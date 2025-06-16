@@ -5,7 +5,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_library(gchq_daemon SHARED src/single_instance_lock.cxx src/configuration.cxx src/configuration_monitor.cxx)
+add_library(
+  gchq_daemon SHARED
+  src/active_configuration_monitor.cxx
+  src/composite_configuration_monitor.cxx
+  src/caching_configuration_monitor.cxx
+  src/configuration.cxx
+  src/configuration_monitor_factory.cxx
+  src/configuration_monitor_options.cxx
+  src/passive_configuration_monitor.cxx
+  src/single_instance_lock.cxx)
 target_include_directories(gchq_daemon PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                                               $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 

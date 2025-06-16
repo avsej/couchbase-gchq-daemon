@@ -12,15 +12,11 @@
  * the License.
  */
 
-#pragma once
+#include "active_configuration_monitor.hxx"
 
-#include "gchq_daemon_export.h"
-
-#include <configuration.hxx>
-
-class GCHQ_DAEMON_EXPORT configuration_monitor
+auto
+active_configuration_monitor::current_configuration() const -> configuration
 {
-public:
-  virtual auto current_configuration() const -> configuration = 0;
-  virtual ~configuration_monitor() = default;
-};
+  return current_configuration_;
+}
+

@@ -16,11 +16,16 @@
 
 #include "gchq_daemon_export.h"
 
-#include <configuration.hxx>
+#include <configuration_monitor.hxx>
+#include <configuration_monitor_options.hxx>
 
-class GCHQ_DAEMON_EXPORT configuration_monitor
+#include <memory>
+
+class GCHQ_DAEMON_EXPORT configuration_monitor_factory
 {
 public:
-  virtual auto current_configuration() const -> configuration = 0;
-  virtual ~configuration_monitor() = default;
+  static auto create(const configuration_monitor_options &options) -> std::shared_ptr<configuration_monitor>;
+
+  static auto caching_composite_monitor() -> std::shared_ptr<configuration_monitor>;
 };
+

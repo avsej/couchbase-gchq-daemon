@@ -17,10 +17,13 @@
 #include "gchq_daemon_export.h"
 
 #include <configuration.hxx>
+#include <configuration_monitor.hxx>
 
-class GCHQ_DAEMON_EXPORT configuration_monitor
+class GCHQ_DAEMON_NO_EXPORT active_configuration_monitor : public configuration_monitor
 {
 public:
-  virtual auto current_configuration() const -> configuration = 0;
-  virtual ~configuration_monitor() = default;
+  auto current_configuration() const -> configuration;
+
+private:
+  configuration current_configuration_;
 };

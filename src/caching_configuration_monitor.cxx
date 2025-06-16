@@ -12,15 +12,16 @@
  * the License.
  */
 
-#pragma once
+#include "caching_configuration_monitor.hxx"
 
-#include "gchq_daemon_export.h"
-
-#include <configuration.hxx>
-
-class GCHQ_DAEMON_EXPORT configuration_monitor
+caching_configuration_monitor::caching_configuration_monitor(
+  std::shared_ptr<configuration_monitor> upstream)
+  : upstream_{ std::move(upstream) }
 {
-public:
-  virtual auto current_configuration() const -> configuration = 0;
-  virtual ~configuration_monitor() = default;
-};
+}
+
+auto
+caching_configuration_monitor::current_configuration() const -> configuration
+{
+  return current_configuration_;
+}

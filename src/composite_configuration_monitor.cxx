@@ -12,15 +12,18 @@
  * the License.
  */
 
-#pragma once
+#include "composite_configuration_monitor.hxx"
 
-#include "gchq_daemon_export.h"
-
-#include <configuration.hxx>
-
-class GCHQ_DAEMON_EXPORT configuration_monitor
+composite_configuration_monitor::composite_configuration_monitor(
+  std::shared_ptr<active_configuration_monitor> active,
+  std::shared_ptr<passive_configuration_monitor> passive)
+  : active_{ std::move(active) }
+  , passive_{ std::move(passive) }
 {
-public:
-  virtual auto current_configuration() const -> configuration = 0;
-  virtual ~configuration_monitor() = default;
-};
+}
+
+auto
+composite_configuration_monitor::current_configuration() const -> configuration
+{
+  return current_configuration_;
+}
