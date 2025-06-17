@@ -33,7 +33,7 @@ public:
   composite_configuration_monitor(std::shared_ptr<active_configuration_monitor> active,
                                   std::shared_ptr<passive_configuration_monitor> passive);
 
-  auto current_configuration() const -> configuration;
+  auto current_configuration() const -> configuration override;
 
 private:
   std::shared_ptr<active_configuration_monitor> active_;

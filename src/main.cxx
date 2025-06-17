@@ -12,8 +12,6 @@
  * the License.
  */
 
-#include <single_instance_lock.hxx>
-
 #include <iostream>
 
 int

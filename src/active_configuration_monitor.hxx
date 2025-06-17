@@ -22,7 +22,7 @@
 class GCHQ_DAEMON_NO_EXPORT active_configuration_monitor : public configuration_monitor
 {
 public:
-  auto current_configuration() const -> configuration;
+  auto current_configuration() const -> configuration override;
 
 private:
   configuration current_configuration_;

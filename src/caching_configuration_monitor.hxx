@@ -20,6 +20,7 @@
 #include <configuration_monitor.hxx>
 
 #include <memory>
+#include <string>
 
 /**
  * Portably caches configuration
@@ -27,10 +28,9 @@
 class GCHQ_DAEMON_NO_EXPORT caching_configuration_monitor : public configuration_monitor
 {
 public:
-  caching_configuration_monitor(std::shared_ptr<configuration_monitor> upstream);
-  auto current_configuration() const -> configuration;
+  caching_configuration_monitor(const std::string &name, std::shared_ptr<configuration_monitor> upstream);
+  auto current_configuration() const -> configuration override;
 
 private:
   std::shared_ptr<configuration_monitor> upstream_;
-  configuration current_configuration_;
 };

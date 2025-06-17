@@ -19,12 +19,14 @@
 #include <memory>
 #include <string>
 
-class GCHQ_DAEMON_EXPORT single_instance_lock
+class GCHQ_DAEMON_NO_EXPORT single_instance_lock
 {
 public:
   single_instance_lock(const std::string& name);
   single_instance_lock(const single_instance_lock&) = delete;
   single_instance_lock& operator=(const single_instance_lock&) = delete;
+  single_instance_lock(const single_instance_lock&&) noexcept;
+  single_instance_lock& operator=(const single_instance_lock&&) noexcept;
   ~single_instance_lock();
   auto acquired() const -> bool;
 

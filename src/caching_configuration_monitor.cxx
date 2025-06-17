@@ -14,14 +14,69 @@
 
 #include "caching_configuration_monitor.hxx"
 
-caching_configuration_monitor::caching_configuration_monitor(
-  std::shared_ptr<configuration_monitor> upstream)
-  : upstream_{ std::move(upstream) }
+#include "single_instance_lock.hxx"
+
+namespace
 {
+class caching_configuration_leader : public configuration_monitor
+{
+public:
+  caching_configuration_leader(single_instance_lock&& lock,
+                               std::shared_ptr<configuration_monitor> upstream)
+    : lock_{ std::move(lock) }
+    , upstream_{ std::move(upstream) }
+  {
+  }
+
+  auto current_configuration() const -> configuration override
+  {
+    return current_configuration_;
+  }
+
+private:
+  single_instance_lock lock_;
+  std::shared_ptr<configuration_monitor> upstream_;
+  configuration current_configuration_;
+};
+
+class caching_configuration_follower : public configuration_monitor
+{
+public:
+  caching_configuration_follower(const std::string& name,
+                                 std::shared_ptr<configuration_monitor> upstream)
+    : name_{ name }
+    , upstream_{ std::move(upstream) }
+  {
+  }
+
+  auto current_configuration() const -> configuration override
+  {
+    return current_configuration_;
+  }
+
+private:
+  std::string name_;
+  std::shared_ptr<configuration_monitor> upstream_;
+  configuration current_configuration_;
+};
+} // namespace
+
+caching_configuration_monitor::caching_configuration_monitor(
+  const std::string& name,
+  std::shared_ptr<configuration_monitor> upstream)
+{
+  single_instance_lock lock(name);
+
+  if (lock.acquired()) {
+    upstream_ =
+      std::make_shared<caching_configuration_leader>(std::move(lock), std::move(upstream));
+  } else {
+    upstream_ = std::make_shared<caching_configuration_follower>(name, std::move(upstream));
+  }
 }
 
 auto
 caching_configuration_monitor::current_configuration() const -> configuration
 {
-  return current_configuration_;
+  return upstream_->current_configuration();
 }

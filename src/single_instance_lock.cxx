@@ -12,7 +12,7 @@
  * the License.
  */
 
-#include <single_instance_lock.hxx>
+#include "single_instance_lock.hxx"
 
 #include <string>
 
@@ -77,6 +77,26 @@ single_instance_lock::single_instance_lock(const std::string& name)
   : impl_{ std::make_unique<os_resource>(name) }
 {
 }
+
+single_instance_lock::single_instance_lock(single_instance_lock&& other) noexcept
+  : acquired_(other.acquired_)
+  , impl_(std::move(other.impl_))
+{
+  other.acquired_ = false; // Ensure moved-from object is valid and not "acquired"
+}
+
+// Move assignment operator
+single_instance_lock&
+single_instance_lock::operator=(single_instance_lock&& other) noexcept
+{
+  if (this != &other) {
+    impl_ = std::move(other.impl_);
+    acquired_ = other.acquired_;
+    other.acquired_ = false; // Ensure moved-from object is valid and not "acquired"
+  }
+  return *this;
+}
+
 single_instance_lock::~single_instance_lock() = default;
 
 auto
