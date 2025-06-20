@@ -14,15 +14,13 @@
 
 #include <iostream>
 
+#include <configuration_monitor_factory.hxx>
+
 int
 main()
 {
-  single_instance_lock lock("my_unique_daemon");
-
-  if (lock.acquired()) {
-    std::cout << "This process is the main (daemon) process.\n";
-  } else {
-    std::cout << "Another daemon process is already running. Exiting.\n";
-  }
+  auto monitor = configuration_monitor_factory::caching_composite_monitor();
+  auto configuration = monitor->current_configuration();
+  std::cout << to_string(configuration) << "\n";
   return 0;
 }

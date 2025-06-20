@@ -82,7 +82,7 @@ single_instance_lock::single_instance_lock(single_instance_lock&& other) noexcep
   : acquired_(other.acquired_)
   , impl_(std::move(other.impl_))
 {
-  other.acquired_ = false; // Ensure moved-from object is valid and not "acquired"
+  other.acquired_ = false;
 }
 
 // Move assignment operator
@@ -92,7 +92,7 @@ single_instance_lock::operator=(single_instance_lock&& other) noexcept
   if (this != &other) {
     impl_ = std::move(other.impl_);
     acquired_ = other.acquired_;
-    other.acquired_ = false; // Ensure moved-from object is valid and not "acquired"
+    other.acquired_ = false;
   }
   return *this;
 }
